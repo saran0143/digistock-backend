@@ -9,11 +9,11 @@ pipeline {
                 dnsPolicy: ClusterFirstWithHostNet
                 dnsConfig:
                   nameservers:
-                                        - 8.8.8.8
-                                        - 8.8.4.4
+                                    - 8.8.8.8
+                                    - 8.8.4.4
                   options:
-                                        - name: ndots
-                      value: "5"
+                                    - name: ndots
+                    value: "5"
                 containers:
                                 - name: docker
                   image: docker:24-dind
