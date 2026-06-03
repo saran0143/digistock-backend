@@ -79,8 +79,12 @@ pipeline {
         stage('Deploy to K8s') {
             steps {
                 container('kubectl') {
-                    withKubeConfig([credentialsId: 'kubeconfig']) {
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
                         sh '''
+                          export KUBECONFIG=$KUBECONFIG_FILE
+                          echo "=== Current Context ==="
+                          kubectl config current-context
+                          
                           echo "=== Updating Deployment ==="
                           kubectl set image deployment/${K8S_DEPLOYMENT} ${K8S_DEPLOYMENT}=${IMAGE_NAME}:${IMAGE_TAG} -n ${K8S_NAMESPACE}
                           
