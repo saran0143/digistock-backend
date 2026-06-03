@@ -5,7 +5,15 @@ pipeline {
 apiVersion: v1
 kind: Pod
 spec:
-  hostNetwork: true
+  dnsPolicy: ClusterFirst
+  dnsConfig:
+    nameservers:
+      - 8.8.8.8
+      - 8.8.4.4
+    options:
+      - name: ndots
+        value: "5"
+
   containers:
     - name: docker
       image: docker:24-dind
@@ -24,7 +32,7 @@ spec:
           value: overlay2
 
     - name: kubectl
-      image: bitnami/kubectl:1.29.7
+      image: alpine/k8s:1.29.7
       command:
         - sleep
       args:
@@ -63,6 +71,7 @@ spec:
                         sh '''
                           echo "=== Testing DNS ==="
                           nslookup registry-1.docker.io || true
+                          nslookup auth.docker.io || true
 
                           echo "=== Waiting 30s for Docker daemon ==="
                           for i in $(seq 1 30); do
