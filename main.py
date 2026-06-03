@@ -4,17 +4,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 import sqlite3
 from datetime import datetime
-from fastapi import FastAPI
 
-app = FastAPI()
-
-@app.get("/")
-def home():
-    return {"status": "DigiStock Backend Running 🔥", "docs": "/docs"}
-
-@app.get("/health")
-def health_check():
-    return {"status": "healthy"}
 
 app = FastAPI()
 
