@@ -7,22 +7,26 @@ pipeline {
               spec:
                 containers:
                 - name: docker
-                  image: docker:24-dind
+                  image: docker:27-dind
+                  securityContext:
+                    privileged: true
                   command:
                   - cat
                   tty: true
+                  env:
+                  - name: DOCKER_TLS_CERTDIR
+                    value: ""
                   volumeMounts:
-                  - name: docker-sock
-                    mountPath: /var/run/docker.sock
+                  - name: docker-graph-storage
+                    mountPath: /var/lib/docker
                 - name: kubectl
-                  image: bitnami/kubectl:latest
+                  image: bitnami/kubectl:1.30
                   command:
                   - cat
                   tty: true
                 volumes:
-                - name: docker-sock
-                  hostPath:
-                    path: /var/run/docker.sock
+                - name: docker-graph-storage
+                  emptyDir: {}
             '''
             defaultContainer 'docker'
         }
@@ -37,7 +41,7 @@ pipeline {
         
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t 2100031907/digistock-backend:1 .'
+                sh 'dockerd & sleep 5 && docker build -t 2100031907/digistock-backend:1 .'
             }
         }
         
