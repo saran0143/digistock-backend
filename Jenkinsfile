@@ -1,43 +1,61 @@
 pipeline {
-    agent any
-    
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
-        IMAGE_NAME = "2100031907/digistock-backend"  
-        IMAGE_TAG = "${BUILD_NUMBER}"
+    agent {
+        kubernetes {
+            yaml '''
+              apiVersion: v1
+              kind: Pod
+              spec:
+                containers:
+                - name: docker
+                  image: docker:24-dind
+                  command:
+                  - cat
+                  tty: true
+                  volumeMounts:
+                  - name: docker-sock
+                    mountPath: /var/run/docker.sock
+                - name: kubectl
+                  image: bitnami/kubectl:latest
+                  command:
+                  - cat
+                  tty: true
+                volumes:
+                - name: docker-sock
+                  hostPath:
+                    path: /var/run/docker.sock
+            '''
+            defaultContainer 'docker'
+        }
     }
     
     stages {
         stage('Clone Repo') {
             steps {
-                git branch: 'main', url: 'https://github.com/saran0143/digistock-backend.git' 
+                git branch: 'main', url: 'https://github.com/saran0143/digistock-backend.git'
             }
         }
         
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
-                }
+                sh 'docker build -t 2100031907/digistock-backend:1 .'
             }
         }
         
         stage('Push to DockerHub') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-creds') {
-                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
-                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push('latest')
-                    }
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                      echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                      docker push 2100031907/digistock-backend:1
+                    '''
                 }
             }
         }
         
         stage('Deploy to K8s') {
             steps {
-                script {
-                    sh "kubectl set image deployment/digistock-backend digistock-backend=${IMAGE_NAME}:${IMAGE_TAG} --record"
-                    sh "kubectl rollout status deployment/digistock-backend"
+                container('kubectl') {
+                    sh 'kubectl set image deployment/digistock-backend digistock-backend=2100031907/digistock-backend:1'
                 }
             }
         }
