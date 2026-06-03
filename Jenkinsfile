@@ -8,26 +8,20 @@ pipeline {
                 hostNetwork: true
                 containers:
                 - name: docker
-                  image: docker:27-dind
+                  image: crazymax/docker:cli-dind
                   securityContext:
                     privileged: true
                   command:
                   - cat
                   tty: true
                   env:
-                  - name: DOCKER_TLS_CERTDIR
-                    value: ""
-                  volumeMounts:
-                  - name: docker-graph-storage
-                    mountPath: /var/lib/docker
+                  - name: DOCKER_HOST
+                    value: tcp://localhost:2375
                 - name: kubectl
-                  image: bitnami/kubectl:latest
+                  image: alpine/k8s:1.30.2
                   command:
                   - cat
                   tty: true
-                volumes:
-                - name: docker-graph-storage
-                  emptyDir: {}
             '''
             defaultContainer 'docker'
         }
@@ -42,7 +36,7 @@ pipeline {
         
         stage('Build Docker Image') {
             steps {
-                sh 'dockerd & sleep 15 && docker build -t 2100031907/digistock-backend:1 .'
+                sh 'sleep 10 && docker build -t 2100031907/digistock-backend:1 .'
             }
         }
         
