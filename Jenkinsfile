@@ -12,13 +12,15 @@ pipeline {
                   image: docker:24-dind
                   securityContext:
                     privileged: true
-                  command: ['cat']
+                  args: ['--host=tcp://0.0.0.0:2375', '--host=unix:///var/run/docker.sock']
                   tty: true
                   env:
                   - name: DOCKER_HOST
                     value: tcp://localhost:2375
                   - name: DOCKER_TLS_CERTDIR
                     value: ""
+                  - name: DOCKER_DRIVER
+                    value: overlay2
             '''
         }
     }
@@ -33,8 +35,13 @@ pipeline {
                 container('docker') { 
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                         sh '''
-                          echo "=== Waiting for Docker daemon ==="
-                          sleep 30
+                          echo "=== Waiting 30s for Docker daemon ==="
+                          for i in $(seq 1 30); do
+                            docker info >/dev/null 2>&1 && break
+                            echo "Waiting... $i/30"
+                            sleep 1
+                          done
+                          echo "=== Docker is Ready ==="
                           docker ps
                           echo "=== Building Image ==="
                           docker build -t 2100031907/digistock-backend:1 .
@@ -42,7 +49,7 @@ pipeline {
                           echo $PASS | docker login -u $USER --password-stdin
                           echo "=== Pushing Image ==="
                           docker push 2100031907/digistock-backend:1
-                          echo "=== SUCCESS ==="
+                          echo "=== SUCCESS - IMAGE PUSHED ==="
                         '''
                     }
                 } 
