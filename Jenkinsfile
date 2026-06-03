@@ -2,40 +2,42 @@ pipeline {
     agent {
         kubernetes {
             yaml '''
-              apiVersion: v1
-              kind: Pod
-              spec:
-                hostNetwork: true
-                dnsPolicy: ClusterFirstWithHostNet
-                dnsConfig:
-                  nameservers:
-                                    - 8.8.8.8
-                                    - 8.8.4.4
-                  options:
-                                    - name: ndots
-                    value: "5"
-                containers:
-                                - name: docker
-                  image: docker:24-dind
-                  securityContext:
-                    privileged: true
-                  args: ['--host=tcp://0.0.0.0:2375', '--host=unix:///var/run/docker.sock']
-                  tty: true
-                  env:
-                                    - name: DOCKER_HOST
-                    value: tcp://localhost:2375
-                                    - name: DOCKER_TLS_CERTDIR
-                    value: ""
-                                    - name: DOCKER_DRIVER
-                    value: overlay2
-                                - name: kubectl
-                  image: bitnami/kubectl:1.29
-                  command:
-                                    - sleep
-                  args:
-                                    - infinity
-                  tty: true
-            '''
+apiVersion: v1
+kind: Pod
+spec:
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  dnsConfig:
+    nameservers:
+        - 8.8.8.8
+        - 8.8.4.4
+    options:
+        - name: ndots
+      value: "5"
+  containers:
+    - name: docker
+    image: docker:24-dind
+    securityContext:
+      privileged: true
+    args:
+        - --host=tcp://0.0.0.0:2375
+        - --host=unix:///var/run/docker.sock
+    tty: true
+    env:
+        - name: DOCKER_HOST
+      value: tcp://localhost:2375
+        - name: DOCKER_TLS_CERTDIR
+      value: ""
+        - name: DOCKER_DRIVER
+      value: overlay2
+    - name: kubectl
+    image: bitnami/kubectl:1.29
+    command:
+        - sleep
+    args:
+        - infinity
+    tty: true
+'''
         }
     }
     environment {
