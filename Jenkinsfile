@@ -6,14 +6,6 @@ apiVersion: v1
 kind: Pod
 spec:
   hostNetwork: true
-  dnsPolicy: ClusterFirstWithHostNet
-  dnsConfig:
-    nameservers:
-        - 8.8.8.8
-        - 8.8.4.4
-    options:
-        - name: ndots
-      value: "5"
   containers:
     - name: docker
     image: docker:24-dind
@@ -57,8 +49,6 @@ spec:
                 container('docker') { 
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                         sh '''
-                          echo "=== Testing DNS ==="
-                          nslookup registry-1.docker.io
                           echo "=== Waiting 30s for Docker daemon ==="
                           for i in $(seq 1 30); do
                             docker info >/dev/null 2>&1 && break
@@ -89,17 +79,11 @@ spec:
                           echo "=== Current Context ==="
                           kubectl config current-context
                           
-                          echo "=== Check Deployment Exists ==="
-                          kubectl get deployment ${K8S_DEPLOYMENT} -n ${K8S_NAMESPACE}
-                          
                           echo "=== Updating Deployment ==="
                           kubectl set image deployment/${K8S_DEPLOYMENT} ${K8S_DEPLOYMENT}=${IMAGE_NAME}:${IMAGE_TAG} -n ${K8S_NAMESPACE}
                           
                           echo "=== Waiting for Rollout ==="
                           kubectl rollout status deployment/${K8S_DEPLOYMENT} -n ${K8S_NAMESPACE} --timeout=2m
-                          
-                          echo "=== Current Pods ==="
-                          kubectl get pods -l app=${K8S_DEPLOYMENT} -n ${K8S_NAMESPACE}
                           
                           echo "=== DEPLOY SUCCESS ==="
                         '''
