@@ -24,7 +24,7 @@ spec:
           value: overlay2
 
     - name: kubectl
-      image: bitnami/kubectl:1.29
+      image: bitnami/kubectl:1.29.7
       command:
         - sleep
       args:
@@ -61,8 +61,10 @@ spec:
                         )
                     ]) {
                         sh '''
-                          echo "=== Waiting 30s for Docker daemon ==="
+                          echo "=== Testing DNS ==="
+                          nslookup registry-1.docker.io || true
 
+                          echo "=== Waiting 30s for Docker daemon ==="
                           for i in $(seq 1 30); do
                             docker info >/dev/null 2>&1 && break
                             echo "Waiting... $i/30"
