@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
-        IMAGE_NAME = "your-dockerhub-2100031907/digistock-backend"  
+        IMAGE_NAME = "2100031907/digistock-backend"  
         IMAGE_TAG = "${BUILD_NUMBER}"
     }
     
