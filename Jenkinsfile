@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Clone Repo') {
             steps {
-                git branch: 'main', url: 'https://github.com/saran0143/digistockbackend.git' 
+                git branch: 'main', url: 'https://github.com/saran0143/digistock-backend.git' 
             }
         }
         
