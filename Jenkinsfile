@@ -29,9 +29,11 @@ pipeline {
                   - name: DOCKER_DRIVER
                     value: overlay2
                 - name: kubectl
-                  image: bitnami/kubectl:latest
+                  image: bitnami/kubectl:1.28
                   command:
-                  - cat
+                  - sleep
+                  args:
+                  - infinity
                   tty: true
             '''
         }
@@ -84,6 +86,9 @@ pipeline {
                           export KUBECONFIG=$KUBECONFIG_FILE
                           echo "=== Current Context ==="
                           kubectl config current-context
+                          
+                          echo "=== Check Deployment Exists ==="
+                          kubectl get deployment ${K8S_DEPLOYMENT} -n ${K8S_NAMESPACE} || exit 1
                           
                           echo "=== Updating Deployment ==="
                           kubectl set image deployment/${K8S_DEPLOYMENT} ${K8S_DEPLOYMENT}=${IMAGE_NAME}:${IMAGE_TAG} -n ${K8S_NAMESPACE}
