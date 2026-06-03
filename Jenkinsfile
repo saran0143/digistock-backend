@@ -20,7 +20,7 @@ pipeline {
                   - name: docker-graph-storage
                     mountPath: /var/lib/docker
                 - name: kubectl
-                  image: bitnami/kubectl:1.30
+                  image: bitnami/kubectl:latest
                   command:
                   - cat
                   tty: true
