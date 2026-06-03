@@ -28,8 +28,19 @@ pipeline {
                     value: ""
                   - name: DOCKER_DRIVER
                     value: overlay2
+                - name: kubectl
+                  image: bitnami/kubectl:latest
+                  command:
+                  - cat
+                  tty: true
             '''
         }
+    }
+    environment {
+        IMAGE_NAME = "2100031907/digistock-backend"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        K8S_DEPLOYMENT = "digistock-backend"
+        K8S_NAMESPACE = "default"
     }
     stages {
         stage('Clone') { 
@@ -53,16 +64,45 @@ pipeline {
                           echo "=== Docker is Ready ==="
                           docker ps
                           echo "=== Building Image ==="
-                          docker build -t 2100031907/digistock-backend:1 .
+                          docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest .
                           echo "=== Logging to DockerHub ==="
                           echo $PASS | docker login -u $USER --password-stdin
                           echo "=== Pushing Image ==="
-                          docker push 2100031907/digistock-backend:1
+                          docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                          docker push ${IMAGE_NAME}:latest
                           echo "=== SUCCESS - IMAGE PUSHED ==="
                         '''
                     }
                 } 
             } 
+        }
+        stage('Deploy to K8s') {
+            steps {
+                container('kubectl') {
+                    withKubeConfig([credentialsId: 'kubeconfig']) {
+                        sh '''
+                          echo "=== Updating Deployment ==="
+                          kubectl set image deployment/${K8S_DEPLOYMENT} ${K8S_DEPLOYMENT}=${IMAGE_NAME}:${IMAGE_TAG} -n ${K8S_NAMESPACE}
+                          
+                          echo "=== Waiting for Rollout ==="
+                          kubectl rollout status deployment/${K8S_DEPLOYMENT} -n ${K8S_NAMESPACE} --timeout=2m
+                          
+                          echo "=== Current Pods ==="
+                          kubectl get pods -l app=${K8S_DEPLOYMENT} -n ${K8S_NAMESPACE}
+                          
+                          echo "=== DEPLOY SUCCESS ==="
+                        '''
+                    }
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo "Pipeline Success: ${IMAGE_NAME}:${IMAGE_TAG} deployed to ${K8S_NAMESPACE}"
+        }
+        failure {
+            echo "Pipeline Failed. Check logs."
         }
     }
 }
