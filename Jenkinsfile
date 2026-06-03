@@ -8,7 +8,7 @@ spec:
   hostNetwork: true
   containers:
     - name: docker
-    image: docker:24-dind
+      image: docker:24-dind
     securityContext:
       privileged: true
     args:
@@ -17,13 +17,13 @@ spec:
     tty: true
     env:
         - name: DOCKER_HOST
-      value: tcp://localhost:2375
+        value: tcp://localhost:2375
         - name: DOCKER_TLS_CERTDIR
       value: ""
         - name: DOCKER_DRIVER
       value: overlay2
     - name: kubectl
-    image: bitnami/kubectl:1.29
+      image: bitnami/kubectl:1.29
     command:
         - sleep
     args:
