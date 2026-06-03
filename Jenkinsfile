@@ -5,11 +5,7 @@ pipeline {
               apiVersion: v1
               kind: Pod
               spec:
-                dnsPolicy: "None"
-                dnsConfig:
-                  nameservers:
-                    - 8.8.8.8
-                    - 8.8.4.4
+                hostNetwork: true
                 containers:
                 - name: docker
                   image: docker:27-dind
@@ -46,7 +42,7 @@ pipeline {
         
         stage('Build Docker Image') {
             steps {
-                sh 'dockerd & sleep 10 && docker build -t 2100031907/digistock-backend:1 .'
+                sh 'dockerd & sleep 15 && docker build -t 2100031907/digistock-backend:1 .'
             }
         }
         
