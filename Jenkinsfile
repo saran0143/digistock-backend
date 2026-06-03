@@ -27,14 +27,14 @@ spec:
     }
 
     stages {
-        stage('Git Clone Test') {
+        stage('Test') {
             steps {
                 container('jnlp') {
-                    sh 'echo "Agent connected successfully"'
+                    sh 'echo "=== AGENT CONNECTED ==="'
                     sh 'cat /etc/resolv.conf'
-                    sh 'nslookup github.com || true'
-                    sh 'git clone https://github.com/saran0143/digistock-backend.git'
-                    sh 'ls -la digistock-backend'
+                    sh 'nslookup github.com'
+                    sh 'git ls-remote https://github.com/saran0143/digistock-backend.git'
+                    sh 'echo "=== GIT SUCCESS ==="'
                 }
             }
         }
