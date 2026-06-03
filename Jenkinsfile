@@ -9,31 +9,31 @@ pipeline {
                 dnsPolicy: ClusterFirstWithHostNet
                 dnsConfig:
                   nameservers:
-                    - 8.8.8.8
-                    - 8.8.4.4
+                                        - 8.8.8.8
+                                        - 8.8.4.4
                   options:
-                    - name: ndots
+                                        - name: ndots
                       value: "5"
                 containers:
-                - name: docker
+                                - name: docker
                   image: docker:24-dind
                   securityContext:
                     privileged: true
                   args: ['--host=tcp://0.0.0.0:2375', '--host=unix:///var/run/docker.sock']
                   tty: true
                   env:
-                  - name: DOCKER_HOST
+                                    - name: DOCKER_HOST
                     value: tcp://localhost:2375
-                  - name: DOCKER_TLS_CERTDIR
+                                    - name: DOCKER_TLS_CERTDIR
                     value: ""
-                  - name: DOCKER_DRIVER
+                                    - name: DOCKER_DRIVER
                     value: overlay2
-                - name: kubectl
-                  image: bitnami/kubectl:1.28
+                                - name: kubectl
+                  image: bitnami/kubectl:1.29
                   command:
-                  - sleep
+                                    - sleep
                   args:
-                  - infinity
+                                    - infinity
                   tty: true
             '''
         }
@@ -88,7 +88,7 @@ pipeline {
                           kubectl config current-context
                           
                           echo "=== Check Deployment Exists ==="
-                          kubectl get deployment ${K8S_DEPLOYMENT} -n ${K8S_NAMESPACE} || exit 1
+                          kubectl get deployment ${K8S_DEPLOYMENT} -n ${K8S_NAMESPACE}
                           
                           echo "=== Updating Deployment ==="
                           kubectl set image deployment/${K8S_DEPLOYMENT} ${K8S_DEPLOYMENT}=${IMAGE_NAME}:${IMAGE_TAG} -n ${K8S_NAMESPACE}
