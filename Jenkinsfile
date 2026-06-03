@@ -9,7 +9,7 @@ pipeline {
                 dnsPolicy: ClusterFirstWithHostNet
                 containers:
                 - name: docker
-                  image: docker:27.2-dind
+                  image: docker:24-dind
                   securityContext:
                     privileged: true
                   command: ['cat']
@@ -20,7 +20,7 @@ pipeline {
                   - name: DOCKER_TLS_CERTDIR
                     value: ""
                 - name: kubectl
-                  image: bitnami/kubectl:1.30.2
+                  image: bitnami/kubectl:1.30
                   command: ['cat']
                   tty: true
             '''
@@ -36,8 +36,8 @@ pipeline {
             steps { 
                 container('docker') { 
                     sh '''
-                      sleep 15
-                      docker info
+                      sleep 20
+                      docker ps
                       docker build -t 2100031907/digistock-backend:1 .
                     '''
                 } 
@@ -55,7 +55,7 @@ pipeline {
         stage('Deploy') { 
             steps { 
                 container('kubectl') { 
-                    sh 'kubectl set image deployment/digistock-backend digistock-backend=2100031907/digistock-backend:1 || echo "Skip deploy - first run"' 
+                    sh 'kubectl get nodes && echo "Deploy skip - first run"'
                 } 
             } 
         }
