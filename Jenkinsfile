@@ -6,9 +6,10 @@ pipeline {
               kind: Pod
               spec:
                 hostNetwork: true
+                dnsPolicy: ClusterFirstWithHostNet
                 containers:
                 - name: docker
-                  image: crazymax/docker:cli-dind
+                  image: docker:27.2-dind
                   securityContext:
                     privileged: true
                   command: ['cat']
@@ -16,8 +17,10 @@ pipeline {
                   env:
                   - name: DOCKER_HOST
                     value: tcp://localhost:2375
+                  - name: DOCKER_TLS_CERTDIR
+                    value: ""
                 - name: kubectl
-                  image: alpine/k8s:1.30.2
+                  image: bitnami/kubectl:1.30.2
                   command: ['cat']
                   tty: true
             '''
@@ -32,7 +35,11 @@ pipeline {
         stage('Build Image') { 
             steps { 
                 container('docker') { 
-                    sh 'sleep 10 && docker build -t 2100031907/digistock-backend:1 .' 
+                    sh '''
+                      sleep 15
+                      docker info
+                      docker build -t 2100031907/digistock-backend:1 .
+                    '''
                 } 
             } 
         }
