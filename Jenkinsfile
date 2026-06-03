@@ -7,6 +7,13 @@ pipeline {
               spec:
                 hostNetwork: true
                 dnsPolicy: ClusterFirstWithHostNet
+                dnsConfig:
+                  nameservers:
+                    - 8.8.8.8
+                    - 8.8.4.4
+                  options:
+                    - name: ndots
+                      value: "5"
                 containers:
                 - name: docker
                   image: docker:24-dind
@@ -35,6 +42,8 @@ pipeline {
                 container('docker') { 
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                         sh '''
+                          echo "=== Testing DNS ==="
+                          nslookup registry-1.docker.io
                           echo "=== Waiting 30s for Docker daemon ==="
                           for i in $(seq 1 30); do
                             docker info >/dev/null 2>&1 && break
