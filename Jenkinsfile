@@ -17,6 +17,11 @@ spec:
       tty: true
       command:
         - cat
+      env:
+        - name: JENKINS_TUNNEL
+          value: "jenkins.jenkins.svc.cluster.local:50000"
+        - name: JENKINS_URL
+          value: "http://jenkins.jenkins.svc.cluster.local:8080"
 '''
         }
     }
@@ -27,15 +32,7 @@ spec:
                 container('jnlp') {
                     sh 'cat /etc/resolv.conf'
                     sh 'nslookup github.com'
-                }
-            }
-        }
-
-        stage('Clone & Build') {
-            steps {
-                container('jnlp') {
                     sh 'git clone https://github.com/saran0143/digistock-backend.git'
-                    sh 'ls -la digistock-backend'
                 }
             }
         }
