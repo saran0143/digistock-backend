@@ -14,9 +14,9 @@ spec:
   containers:
     - name: jnlp
       image: jenkins/inbound-agent:latest
-      tty: true
       command:
         - cat
+      tty: true
       env:
         - name: JENKINS_TUNNEL
           value: "jenkins.jenkins.svc.cluster.local:50000"
@@ -27,12 +27,14 @@ spec:
     }
 
     stages {
-        stage('DNS Test') {
+        stage('Git Clone Test') {
             steps {
                 container('jnlp') {
+                    sh 'echo "Agent connected successfully"'
                     sh 'cat /etc/resolv.conf'
-                    sh 'nslookup github.com'
+                    sh 'nslookup github.com || true'
                     sh 'git clone https://github.com/saran0143/digistock-backend.git'
+                    sh 'ls -la digistock-backend'
                 }
             }
         }
